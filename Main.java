@@ -1,7 +1,7 @@
 
 import java.io.*;
 import java.util.*;
-class Product extends Thread{
+class Product {
     String productId;
     String productName;
     int productPrice;
@@ -67,17 +67,22 @@ class Inventory extends Product{
         }
     }
 
-    synchronized void update(String pid, int pquant) throws IOException, InterruptedException{
+    synchronized void update(String pid, int pquant){
         String oldValue = "", newValue = "";
         for(int print = 0; print < productList.size(); print++) {
 
             if (productList.get(print).productId.equals(pid)) {
                 oldValue = productList.get(print).productId +","+ productList.get(print).productName + ","+productList.get(print).productPrice+","+productList.get(print).productQuantity;
-
-                if(productList.get(print).productQuantity < pquant){
-                    currentThread().sleep(10000);
+                try {
+                    if (productList.get(print).productQuantity < pquant) {
+                        Thread.sleep(10000);
+                    }
+                    else productList.get(print).productQuantity -= pquant;
                 }
-                else productList.get(print).productQuantity -= pquant;
+                catch (Exception e){
+                    System.out.println("Exception occured");
+                }
+
 
                 newValue = productList.get(print).productId + ","+productList.get(print).productName + ","+productList.get(print).productPrice+","+productList.get(print).productQuantity;
 
@@ -97,21 +102,29 @@ class Inventory extends Product{
         displayDetails();
 
     }
-    void updateInventory(String oldValue, String newValue) throws IOException{
-        String filePath = "src/Products.txt";
-        Scanner scanner = new Scanner(new File(filePath));
-        StringBuffer buffer = new StringBuffer();
-        while (scanner.hasNextLine()) {
-            buffer.append(scanner.nextLine()+"\n");
+    void updateInventory(String oldValue, String newValue) {
+        try{
+            String filePath = "src/Products.txt";
+            Scanner scanner = new Scanner(new File(filePath));
+            StringBuffer buffer = new StringBuffer();
+            while (scanner.hasNextLine()) {
+                buffer.append(scanner.nextLine()+"\n");
+            }
+            String fileContents = buffer.toString();
+
+            fileContents = fileContents.replaceAll(oldValue, newValue);
+
+            FileWriter writer = new FileWriter(filePath);
+
+            writer.append(fileContents);
+            writer.flush();
+
         }
-        String fileContents = buffer.toString();
+        catch (Exception e){
 
-        fileContents = fileContents.replaceAll(oldValue, newValue);
 
-        FileWriter writer = new FileWriter(filePath);
+        }
 
-        writer.append(fileContents);
-        writer.flush();
 
     }
     void append(String content){
@@ -162,6 +175,29 @@ class Inventory extends Product{
 
 
 }
+class ProductThreadClass extends Thread{
+    String pid;
+    int pquant;
+
+
+
+        ProductThreadClass(String pid, int pquant){
+        this.pid = pid;
+        this.pquant = pquant;
+    }
+        public void run () {
+            try{
+                new Inventory().update(pid, pquant);
+            }
+            catch (Exception e){
+
+            }
+
+    }
+
+
+}
+
 
 
 public class Main {
@@ -196,6 +232,10 @@ public class Main {
                             System.out.println("Enter the number of products to purchase");
                             int pquant = userInput.nextInt();
                             inventoryObj.update(pid, pquant);
+                            ProductThreadClass thread1 = new ProductThreadClass(pid, pquant);
+                            ProductThreadClass thread2 = new ProductThreadClass(pid, pquant);
+                            thread1.start();
+                            thread2.start();
                         }
                     }
                     catch (DefinedException de){
@@ -232,7 +272,7 @@ public class Main {
                     inventoryObj.append(content);
                     break;
                 case 5:
-                    break
+                    break;
 
 
             }
