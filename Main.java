@@ -231,6 +231,8 @@ public class Main {
                     inventoryObj.add(content);
                     inventoryObj.append(content);
                     break;
+                case 5:
+                    break
 
 
             }
