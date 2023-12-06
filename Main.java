@@ -49,6 +49,7 @@ class Inventory extends Product{
     }
     void add(String productDetails){
         String[] commaSeparation = productDetails.split(",");
+        System.out.println(Arrays.toString(commaSeparation));
         int count = 0;
         while(count < commaSeparation.length){
             Product item = new Product(commaSeparation[count], commaSeparation[count+1], Integer.parseInt(commaSeparation[count+2]),Integer.parseInt(commaSeparation[count+3]));
@@ -81,7 +82,7 @@ class Inventory extends Product{
                 newValue = productList.get(print).productId + ","+productList.get(print).productName + ","+productList.get(print).productPrice+","+productList.get(print).productQuantity;
 
                 String purchased = "ProductID : " + productList.get(print).productId + " is sold";
-               try{
+                try{
                     FileWriter writer = new FileWriter("src/productlogs.txt", true);
                     writer.write(purchased+"\n");
                     writer.close();
@@ -113,11 +114,21 @@ class Inventory extends Product{
         writer.flush();
 
     }
+    void append(String content){
+        try{
+            FileWriter writer = new FileWriter("src/Products.txt", true);
+            writer.write(content);
+            writer.close();
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+    }
     void priceTotal(){
         int price = 0;
         for(int print = 0; print < productList.size(); print++){
 
-           price += productList.get(print).productQuantity * productList.get(print).productPrice;
+            price += productList.get(print).productQuantity * productList.get(print).productPrice;
         }
         try{
             FileWriter writer = new FileWriter("src/Report.txt", true);
@@ -133,7 +144,7 @@ class Inventory extends Product{
         int price = 0;
         for(int print = 0; print < productList.size(); print++){
             if(productList.get(print).productId.equals(pid))
-            price += productList.get(print).productQuantity * productList.get(print).productPrice;
+                price += productList.get(print).productQuantity * productList.get(print).productPrice;
         }
         System.out.println("the total amount of :"+pid+" is "+price+"\n");
         try{
@@ -164,7 +175,7 @@ public class Main {
 
 
         while(true) {
-            System.out.println("Enter the option : \n 1.Read the products \n 2.Purchase a product \n 3.Report \n 4.Quit");
+            System.out.println("Enter the option : \n 1.Read the products \n 2.Purchase a product \n 3.Report \n 4.Add a product \n 5.Quit");
             int option = userInput.nextInt();
             switch (option) {
                 case 1:
@@ -175,21 +186,21 @@ public class Main {
                     break;
                 case 2:
 
-                        System.out.println("Enter the product id to purchase");
-                        String pid = userInput.next();
-                        try{
-                            if(pid.length() < 5 ){
-                                throw new DefinedException("Provide id with P-ID");
-                            }
-                            else{
-                                System.out.println("Enter the number of products to purchase");
-                                int pquant = userInput.nextInt();
-                                inventoryObj.update(pid, pquant);
-                            }
+                    System.out.println("Enter the product id to purchase");
+                    String pid = userInput.next();
+                    try{
+                        if(pid.length() < 5 ){
+                            throw new DefinedException("Provide id with P-ID");
                         }
-                        catch (DefinedException de){
-                            System.out.println(de);
+                        else{
+                            System.out.println("Enter the number of products to purchase");
+                            int pquant = userInput.nextInt();
+                            inventoryObj.update(pid, pquant);
                         }
+                    }
+                    catch (DefinedException de){
+                        System.out.println(de);
+                    }
 
                     break;
                 case 3:
@@ -198,14 +209,27 @@ public class Main {
                     if(check == 1){
                         inventoryObj.priceTotal();
                     }
-                    {
-                        System.out.println("Enter the pid to know the price");
-                         pid = userInput.next();
-                        inventoryObj.priceSpecific(pid);
-                    }
+                {
+                    System.out.println("Enter the pid to know the price");
+                    pid = userInput.next();
+                    inventoryObj.priceSpecific(pid);
+                }
 
-                    break;
-                case 5:
+                break;
+                case 4:
+                    String content = "";
+                    System.out.println("Enter the product id");
+                    content += userInput.next()+',';
+
+                    System.out.println("Enter the product name");
+                    content += userInput.next()+',';
+
+                    System.out.println("Enter the price of a product");
+                    content += String.valueOf(userInput.nextInt())+',';
+                    System.out.println("Enter the product Quantity");
+                    content += String.valueOf(userInput.nextInt());
+                    inventoryObj.add(content);
+                    inventoryObj.append(content);
                     break;
 
 
